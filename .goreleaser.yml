@@ -46,5 +46,4 @@ dockers:
       - --label=org.label-schema.description='ct - The chart testing tool'
       - --label=org.label-schema.vendor=Helm
     extra_files:
-      - etc/chart_schema.yaml
-      - etc/lintconf.yaml
+      - etc

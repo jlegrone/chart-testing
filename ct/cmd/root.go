@@ -15,9 +15,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -52,11 +49,8 @@ func NewRootCmd() *cobra.Command {
 }
 
 // Execute runs the application
-func Execute() {
-	if err := NewRootCmd().Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+func Execute() error {
+	return NewRootCmd().Execute()
 }
 
 func addCommonFlags(flags *pflag.FlagSet) {

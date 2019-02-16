@@ -1,5 +1,8 @@
 # Chart Testing
 
+[![CircleCI](https://circleci.com/gh/helm/chart-testing.svg?style=svg)](https://circleci.com/gh/helm/chart-testing)
+[![codecov](https://codecov.io/gh/helm/chart-testing/branch/master/graph/badge.svg)](https://codecov.io/gh/helm/chart-testing)
+
 `ct` is the the tool for testing Helm charts.
 It is meant to be used for linting and testing pull requests.
 It automatically detects charts changed against the target branch.

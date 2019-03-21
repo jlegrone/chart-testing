@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:generate go run ../../hack/docgen ../../doc
+
 package cmd
 
 import (
@@ -46,7 +48,6 @@ func NewRootCmd() *cobra.Command {
 	cmd.AddCommand(newLintAndInstallCmd())
 	cmd.AddCommand(newListChangedCmd())
 	cmd.AddCommand(newVersionCmd())
-	cmd.AddCommand(newGenerateDocsCmd())
 
 	return cmd
 }

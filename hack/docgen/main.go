@@ -12,32 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
-	"github.com/spf13/cobra"
-	"github.com/spf13/cobra/doc"
+	"log"
 	"os"
+
+	"github.com/helm/chart-testing/ct/cmd"
+	"github.com/spf13/cobra/doc"
 )
 
-func newGenerateDocsCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "doc-gen",
-		Short: "Generate documentation",
-		Long: heredoc.Doc(`
-			Generate documentation for all commands
-			to the 'docs' directory.`),
-		Hidden: true,
-		Run:    generateDocs,
+func main() {
+	if len(os.Args) < 2 {
+		log.Fatal("Missing doc directory argument")
 	}
-}
-
-func generateDocs(cmd *cobra.Command, args []string) {
 	fmt.Println("Generating docs...")
 
-	err := doc.GenMarkdownTree(NewRootCmd(), "doc")
+	err := doc.GenMarkdownTree(cmd.NewRootCmd(), os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

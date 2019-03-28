@@ -22,7 +22,6 @@ jobs:
             mkdir /home/circleci/.go_workspace/bin
             go get golang.org/dl/go1.11.5
             go1.11.5 download
-            alias go=go1.11.5
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
             chmod +x ./kubectl
@@ -36,8 +35,11 @@ jobs:
           name: Test
           command: |
             dep ensure -v
-            ./e2e-kind.sh
-            bash <(curl -s https://codecov.io/bash)
+            alias go=go1.11.5 && go version
+            go1.11.5 version
+            go1.11.5 test -cover -coverprofile=coverage.txt -covermode=atomic -race ./...
+            # ./e2e-kind.sh
+            # bash <(curl -s https://codecov.io/bash)
   build:
     docker:
       - image: golang:1.12.4-alpine3.9

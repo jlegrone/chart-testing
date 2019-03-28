@@ -38,7 +38,7 @@ jobs:
           command: |
             touch $BASH_ENV
             echo 'alias go=go1.11.5' >> $BASH_ENV
-            source /home/circleci/.bashrc
+            source $BASH_ENV
             go version
             dep ensure -v
             go test -cover -coverprofile=coverage.txt -covermode=atomic -race ./...

@@ -43,7 +43,7 @@ install_local-path-provisioner() {
 }
 
 test_e2e() {
-    go test -cover -race -tags=integration ./...
+    go test -cover -coverprofile=coverage.txt -covermode=atomic -race -tags=integration ./...
     echo
 }
 

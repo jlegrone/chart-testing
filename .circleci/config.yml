@@ -15,6 +15,8 @@ jobs:
     machine:
       enabled: true
     working_directory: /home/circleci/.go_workspace/src/github.com/helm/chart-testing
+    environment:
+      BASH_ENV: ~/.bashrc
     steps:
       - run:
           name: Install tools
@@ -34,10 +36,12 @@ jobs:
       - run:
           name: Test
           command: |
+            touch $BASH_ENV
+            echo 'alias go=go1.11.5' >> $BASH_ENV
+            source /home/circleci/.bashrc
+            go version
             dep ensure -v
-            alias go=go1.11.5 && go version
-            go1.11.5 version
-            go1.11.5 test -cover -coverprofile=coverage.txt -covermode=atomic -race ./...
+            go test -cover -coverprofile=coverage.txt -covermode=atomic -race ./...
             # ./e2e-kind.sh
             # bash <(curl -s https://codecov.io/bash)
   build:

@@ -17,8 +17,12 @@ package chart
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
+	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/helm/chart-testing/pkg/config"
 	"github.com/helm/chart-testing/pkg/exec"
@@ -224,6 +228,7 @@ type Testing struct {
 	directoryLister          DirectoryLister
 	chartUtils               ChartUtils
 	previousRevisionWorktree string
+	cleanupSteps             []func()
 }
 
 // TestResults holds results and overall status
@@ -251,6 +256,7 @@ func NewTesting(config config.Configuration) Testing {
 		accountValidator: tool.AccountValidator{},
 		directoryLister:  util.DirectoryLister{},
 		chartUtils:       util.ChartUtils{},
+		cleanupSteps:     []func(){},
 	}
 }
 
@@ -260,7 +266,27 @@ func (t *Testing) computePreviousRevisionPath(fileOrDirPath string) string {
 	return filepath.Join(t.previousRevisionWorktree, fileOrDirPath)
 }
 
+func (t *Testing) cleanup() {
+	log.Println("cleaning up")
+}
+
 func (t *Testing) processCharts(action func(chart *Chart) TestResult) ([]TestResult, error) {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+
+	// This goroutine executes a blocking receive for
+	// signals. When it gets one it'll print it out
+	// and then notify the program that it can finish.
+	// TODO: Don't leak goroutine here
+	go func() {
+		sig := <-sigs
+		fmt.Println()
+		log.Println("Received signal:", sig)
+		t.cleanup()
+		os.Exit(1)
+	}()
+	defer t.cleanup()
+
 	var results []TestResult
 	chartDirs, err := t.FindChartDirsToBeProcessed()
 	if err != nil {
@@ -329,11 +355,11 @@ func (t *Testing) processCharts(action func(chart *Chart) TestResult) ([]TestRes
 			return results, errors.Wrap(err, "Could not create previous revision directory")
 		}
 		t.previousRevisionWorktree = worktreePath
-		err = t.git.AddWorktree(worktreePath, mergeBase)
+		err = t.git.AddWorktree(t.previousRevisionWorktree, mergeBase)
 		if err != nil {
 			return results, errors.Wrap(err, "Could not create worktree for previous revision")
 		}
-		defer t.git.RemoveWorktree(worktreePath)
+		defer t.git.RemoveWorktree(t.previousRevisionWorktree)
 
 		for _, chart := range charts {
 			if err := t.helm.BuildDependencies(t.computePreviousRevisionPath(chart.Path())); err != nil {
